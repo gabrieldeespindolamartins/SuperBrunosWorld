@@ -1,35 +1,54 @@
-import { Stage, Sprite} from '@pixi/react'; //importando os comandos Stage e Sprite do Pixi
-import background from '../assets/background.png'; //importando imagem do background
-import bruno from '../assets/bruno.png'; //importando sprite do bruno
+// GameCanvas.jsx
+
+import { Stage, Sprite } from '@pixi/react'; // Importando da versão 7 correta
+import { useState, useEffect } from 'react';
+
+import background from '../assets/background.png'; // Imagem de fundo
+import bruno from '../assets/bruno.png';           // Sprite do personagem
 
 const GameCanvas = () => {
-    return (
-        //definindo Stage (stage é o background)
-        <Stage width={800} height={600} options={{ backgroundColor: 0x1099bb }}> 
-            {/*Definindo imagem do background */}
-            <Sprite image={background} x={0} y={0} />
-            {/*Definindo sprite do bruno */}
-            <Sprite image={bruno} x={100} y={100}/>
-        </Stage>
-    )
-}
+  const [position, setPosition] = useState({ x: 200, y: 350 });
 
-const [position, setPosition] = useState({ x: 100, y: 300});
-
-useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e) => {
-        setPosition(pos => {
-            switch (e.key) {
-                case 'ArrowRight': return {...pos, x: pos.x + 5}; //move pra direita
-                case 'ArrowLeft': return {...pos, x: pos.x - 5}; //move pra esquerda
-                case 'ArrowUp': return {...pos, y: pos.y - 5}; //move pra cima
-                case 'ArrowDown': return {...pos, y: pos.y + 5}; //move pra baixo
-                default: return pos;
-            }
-        });
+      setPosition((pos) => {
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+            return { ...pos, x: pos.x + 5 };
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+            return { ...pos, x: pos.x - 5 };
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+            return { ...pos, y: pos.y - 5 };
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+            return { ...pos, y: pos.y + 5 };
+          default:
+            return pos;
+        }
+      });
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-})
+  }, []);
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#222' }}>
+      <Stage width={1200} height={800} options={{ backgroundColor: 0x1099bb }}>
+        {/* Fundo do jogo */}
+        <Sprite image={background} x={0} y={0} width={1200} height={800} />
+        {/* Personagem Bruno */}
+        <Sprite image={bruno} x={position.x} y={position.y} scale={0.3} />
+      </Stage>
+    </div>
+  );
+};
 
 export default GameCanvas;
