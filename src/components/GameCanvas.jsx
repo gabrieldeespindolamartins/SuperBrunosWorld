@@ -14,15 +14,15 @@ import background from '../assets/background.png'; // Imagem de fundo
 import bruno from '../assets/bruno.png';           // Sprite do personagem
 
 const GameCanvas = () => {
-  const [position, setPosition] = useState({ x: 100, y: 300 });
+  const [position, setPosition] = useState({ x: 100, y: 480 });
   const [flip, setFlip] = useState(false); // Estado para controlar a inversão do sprite
 
   useEffect(() => {// Hook para lidar com eventos de teclado
     const handleKeyDown = (e) => {// Função para mover o personagem com as teclas do teclado
       setPosition((pos) => {
-        const spriteWidth = 300 * 0.3;  // 90
-        const spriteHeight = 500 * 0.3; // 150
-        const stageWidth = 1200;
+        const spriteWidth = 64;  
+        const spriteHeight = 64; 
+        const stageWidth = 600;
         const stageHeight = 800;
       
         let newX = pos.x;
@@ -56,14 +56,15 @@ const GameCanvas = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#222' }}>
-      <Stage width={1200} height={800} options={{ backgroundColor: 0x1099bb }}>
+      <Stage width={800} height={600} options={{ backgroundColor: 0x1099bb }}>
         {/* Fundo do jogo */}
-        <Sprite image={background} x={0} y={0} width={1200} height={800} />
+        <Sprite image={background} x={0} y={0} width={800} height={600} />
         {/* Personagem Bruno */}
         <Sprite 
           image={bruno} 
           x={position.x} 
           y={position.y} 
+          anchor={0.5}
           scale={{ x: flip ? -0.3 : 0.3, y: 0.3 }} // Inverter horizontalmente ao mover para a esquerda
         />
       </Stage>
