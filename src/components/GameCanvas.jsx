@@ -14,16 +14,16 @@ import background from '../assets/background.png'; // Imagem de fundo
 import bruno from '../assets/bruno.png';           // Sprite do personagem
 
 const GameCanvas = () => {
-  const [position, setPosition] = useState({ x: 100, y: 480 });
+  const [position, setPosition] = useState({ x: 100, y: 490 });
   const [flip, setFlip] = useState(false); // Estado para controlar a inversão do sprite
 
   useEffect(() => {// Hook para lidar com eventos de teclado
     const handleKeyDown = (e) => {// Função para mover o personagem com as teclas do teclado
       setPosition((pos) => {
-        const spriteWidth = 64;  
-        const spriteHeight = 64; 
-        const stageWidth = 600;
-        const stageHeight = 800;
+        const spriteWidth = 64 ;  
+        const spriteHeight = 64 ; 
+        const stageWidth = 800;
+        const stageHeight = 600;
       
         let newX = pos.x;
         let newY = pos.y;
@@ -32,13 +32,13 @@ const GameCanvas = () => {
           case 'ArrowRight':
           case 'd':
           case 'D':
-            newX = Math.min(pos.x + 5, stageWidth - spriteWidth);
+            newX = Math.min(pos.x + 5, stageWidth - 10 );
             setFlip(false); // Não inverter o sprite ao mover para a direita
             break;
           case 'ArrowLeft':
           case 'a':
           case 'A':
-            newX = Math.max(pos.x - 5, 0);
+            newX = Math.max(pos.x - 5, 0 + 10);
             setFlip(true); // Inverter o sprite ao mover para a esquerda
             break;
           
