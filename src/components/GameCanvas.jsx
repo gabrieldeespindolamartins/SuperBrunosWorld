@@ -7,65 +7,141 @@
 4- criar sprite especifico paraa cabeça do Bruno que siga o mouse
 */
 
-import { Stage, Sprite } from '@pixi/react'; // Importando da versão 7 correta
-import { useState, useEffect } from 'react';
+import { Stage, Sprite } from '@pixi/react';
+import { useState, useEffect, useRef } from 'react';
 
-import background from '../assets/background.png'; // Imagem de fundo
-import bruno from '../assets/bruno.png';           // Sprite do personagem
+import background from '../assets/background.png';
+import bruno from '../assets/bruno.png';
+
+const GRAVITY = 0.5;
+const JUMP_STRENGTH = -12;
+const GROUND_Y = 490;
+const MOVE_SPEED = 5;
+const STAGE_WIDTH = 800;
 
 const GameCanvas = () => {
-  const [position, setPosition] = useState({ x: 100, y: 490 });
-  const [flip, setFlip] = useState(false); // Estado para controlar a inversão do sprite
+  const [position, setPosition] = useState({ x: 100, y: GROUND_Y });
+  const [flip, setFlip] = useState(false);
 
-  useEffect(() => {// Hook para lidar com eventos de teclado
-    const handleKeyDown = (e) => {// Função para mover o personagem com as teclas do teclado
-      setPosition((pos) => {
-        const spriteWidth = 64 ;  
-        const spriteHeight = 64 ; 
-        const stageWidth = 800;
-        const stageHeight = 600;
-      
-        let newX = pos.x;
-        let newY = pos.y;
-      
-        switch (e.key) {
-          case 'ArrowRight':
-          case 'd':
-          case 'D':
-            newX = Math.min(pos.x + 5, stageWidth - 10 );
-            setFlip(false); // Não inverter o sprite ao mover para a direita
-            break;
-          case 'ArrowLeft':
-          case 'a':
-          case 'A':
-            newX = Math.max(pos.x - 5, 0 + 10);
-            setFlip(true); // Inverter o sprite ao mover para a esquerda
-            break;
-          
-          default:
-            break;
-        }
-      
-        return { x: newX, y: newY };
-      });
+  const velocityY = useRef(0);
+  const jumpCount = useRef(0); // contador de pulos
+  const keysPressed = useRef({
+    left: false,
+    right: false,
+    up: false,
+  });
+
+  // Função para tentar pular
+  const tryJump = () => {
+    if (jumpCount.current < 2) {
+      velocityY.current = JUMP_STRENGTH;
+      jumpCount.current += 1;
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          keysPressed.current.left = true;
+          setFlip(true);
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          keysPressed.current.right = true;
+          setFlip(false);
+          break;
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+        case ' ':
+          tryJump();
+          break;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          keysPressed.current.left = false;
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          keysPressed.current.right = false;
+          break;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    let animationFrameId;
+
+    const update = () => {
+      setPosition((pos) => {
+        let newX = pos.x;
+        let newY = pos.y;
+
+        // Movimento horizontal
+        if (keysPressed.current.left) {
+          newX = Math.max(newX - MOVE_SPEED, 0 + 10);
+        }
+        if (keysPressed.current.right) {
+          newX = Math.min(newX + MOVE_SPEED, STAGE_WIDTH - 10);
+        }
+
+        // Movimento vertical (pulo + gravidade)
+        newY += velocityY.current;
+        velocityY.current += GRAVITY;
+
+        // Ao tocar no chão
+        if (newY >= GROUND_Y) {
+          newY = GROUND_Y;
+          velocityY.current = 0;
+          jumpCount.current = 0; // resetar contador de pulos
+        }
+
+        return { x: newX, y: newY };
+      });
+
+      animationFrameId = requestAnimationFrame(update);
+    };
+
+    update();
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#222' }}>
-      <Stage width={800} height={600} options={{ backgroundColor: 0x1099bb }}>
-        {/* Fundo do jogo */}
-        <Sprite image={background} x={0} y={0} width={800} height={600} />
-        {/* Personagem Bruno */}
-        <Sprite 
-          image={bruno} 
-          x={position.x} 
-          y={position.y} 
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#222',
+      }}
+    >
+      <Stage width={STAGE_WIDTH} height={600} options={{ backgroundColor: 0x1099bb }}>
+        <Sprite image={background} x={0} y={0} width={STAGE_WIDTH} height={600} />
+        <Sprite
+          image={bruno}
+          x={position.x}
+          y={position.y}
           anchor={0.5}
-          scale={{ x: flip ? -0.3 : 0.3, y: 0.3 }} // Inverter horizontalmente ao mover para a esquerda
+          scale={{ x: flip ? -0.3 : 0.3, y: 0.3 }}
         />
       </Stage>
     </div>
